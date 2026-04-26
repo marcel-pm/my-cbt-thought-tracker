@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Thought Tracker">
+<title>Thought Tracker</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  :root{
+    --bg:#ffffff;--bg2:#f5f5f5;--bg3:#ebebeb;
+    --text:#111111;--text2:#555555;--text3:#999999;
+    --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.2);
+    --blue:#185FA5;--blue-bg:#E6F1FB;--blue-text:#0C447C;
+    --teal:#0F6E56;--teal-bg:#E1F5EE;--teal-text:#085041;
+    --purple:#534AB7;--purple-bg:#EEEDFE;--purple-text:#3C3489;
+    --coral-bg:#FAECE7;--coral-border:#F5C4B3;--coral-text:#712B13;--coral-body:#993C1D;
+    --red:#A32D2D;--red-bg:#FCEBEB;--red-border:#F09595;
+    --green:#1D9E75;--radius:12px;--radius-sm:8px;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;
+      --text:#f2f2f7;--text2:#aeaeb2;--text3:#636366;
+      --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+      --blue:#4a9edd;--blue-bg:#1a2a3a;--blue-text:#82c0f0;
+      --teal:#2ec090;--teal-bg:#0d2820;--teal-text:#5edbb0;
+      --purple:#9b8ff0;--purple-bg:#1e1a3a;--purple-text:#c0b8ff;
+      --coral-bg:#2a1a14;--coral-border:#5a2a1a;--coral-text:#f0a080;--coral-body:#d07050;
+      --red:#e06060;--red-bg:#2a1010;--red-border:#6a2020;
+      --green:#2ec090;
+    }
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;font-size:16px}
+  .app{max-width:430px;margin:0 auto;padding-bottom:80px;min-height:100vh}
+  .header{background:var(--bg);border-bottom:0.5px solid var(--border);padding:16px 20px 14px;position:sticky;top:0;z-index:50}
+  .header h1{font-size:20px;font-weight:600;color:var(--text)}
+  .header p{font-size:13px;color:var(--text2);margin-top:2px}
+  .pad{padding:16px}
+  .section-label{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px}
+  .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;cursor:pointer;transition:opacity 0.1s}
+  .card:active{opacity:0.7}
+  .card-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:4px}
+  .card-desc{font-size:13px;color:var(--text2);line-height:1.5}
+  .badge{display:inline-block;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;margin-top:8px}
+  .badge-blue{background:var(--blue-bg);color:var(--blue-text)}
+  .badge-teal{background:var(--teal-bg);color:var(--teal-text)}
+  .badge-purple{background:var(--purple-bg);color:var(--purple-text)}
+  .stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+  .stat{background:var(--bg);border-radius:var(--radius-sm);padding:12px;text-align:center;border:0.5px solid var(--border)}
+  .stat-num{font-size:26px;font-weight:700;color:var(--text)}
+  .stat-label{font-size:11px;color:var(--text2);margin-top:2px}
+  .screen{display:none}
+  .screen.active{display:block}
+  .back-btn{display:inline-flex;align-items:center;gap:4px;font-size:16px;color:var(--blue);cursor:pointer;background:none;border:none;padding:0;margin-bottom:16px;font-family:inherit}
+  .form-group{margin-bottom:16px}
+  .form-label{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block}
+  .form-input{width:100%;padding:11px 14px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg);font-size:16px;color:var(--text);font-family:inherit;resize:none;-webkit-appearance:none}
+  .form-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,95,165,0.12)}
+  .intensity-row{display:flex;align-items:center;gap:12px}
+  .intensity-row input[type=range]{flex:1;height:4px;-webkit-appearance:none;appearance:none;background:var(--border2);border-radius:2px;outline:none}
+  .intensity-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--blue);cursor:pointer}
+  .intensity-val{font-size:14px;font-weight:600;min-width:40px;text-align:right;color:var(--text)}
+  .submit-btn{width:100%;padding:14px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;font-family:inherit;-webkit-appearance:none}
+  .submit-btn:active{opacity:0.8}
+  .step-indicator{display:flex;gap:6px;margin-bottom:24px}
+  .step-dot{height:4px;flex:1;border-radius:2px;background:var(--border2)}
+  .step-dot.active{background:var(--blue)}
+  .step-dot.done{background:var(--green)}
+  .log-item{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px}
+  .log-item-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+  .log-item-type{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.3px}
+  .log-item-time{font-size:11px;color:var(--text3)}
+  .log-item-thought{font-size:14px;color:var(--text);line-height:1.5}
+  .log-item-emotion{font-size:12px;color:var(--text2);margin-top:4px}
+  .delete-btn{font-size:12px;color:var(--red);cursor:pointer;padding:3px 8px;border:0.5px solid var(--red-border);border-radius:6px;background:var(--red-bg);font-family:inherit}
+  .empty-state{text-align:center;padding:48px 20px;color:var(--text3);font-size:14px;line-height:1.6}
+  .prompt-box{border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;font-size:13px;line-height:1.6}
+  .prompt-box.blue{background:var(--teal-bg);border:0.5px solid #9FE1CB;color:var(--teal-text)}
+  .prompt-box.coral{background:var(--coral-bg);border:0.5px solid var(--coral-border);color:var(--coral-text)}
+  .prompt-box.purple{background:var(--purple-bg);border:0.5px solid #AFA9EC;color:var(--purple-text)}
+  .prompt-list{list-style:none;padding:0;margin-top:8px}
+  .prompt-list li{padding:5px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+  .prompt-list li:last-child{border-bottom:none}
+  .prompt-list li::before{content:"•";margin-right:8px;opacity:0.6}
+  .tab-bar{display:flex;background:var(--bg);border-top:0.5px solid var(--border);position:fixed;bottom:0;left:0;right:0;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+  .tab-btn{flex:1;padding:10px 0 12px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;font-family:inherit}
+  .tab-icon{font-size:22px;line-height:1}
+  .tab-label{font-size:10px;color:var(--text3);font-weight:500}
+  .tab-btn.active .tab-label{color:var(--blue)}
+  .ref-section{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .ref-section h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:10px}
+  .ref-section p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:8px}
+  .ref-section p:last-child{margin-bottom:0}
+  .ref-step{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+  .ref-step-num{min-width:24px;height:24px;border-radius:50%;background:var(--blue-bg);color:var(--blue-text);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .ref-step-text{font-size:13px;color:var(--text2);line-height:1.6;flex:1}
+  .ref-acc{border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+  .ref-acc-header{padding:15px 16px;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;background:var(--bg);display:flex;justify-content:space-between;align-items:center;-webkit-tap-highlight-color:transparent}
+  .ref-acc-body{padding:0 16px;overflow:hidden;max-height:0;transition:max-height 0.35s ease,padding 0.2s}
+  .ref-acc-body.open{max-height:2000px;padding:0 16px 16px}
+  .ref-acc-arrow{font-size:12px;color:var(--text3);transition:transform 0.25s;display:inline-block}
+  .ref-acc-arrow.open{transform:rotate(180deg)}
+  .export-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .export-card h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+  .export-card p{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:12px}
+  .export-btn{width:100%;padding:12px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg2);font-size:15px;color:var(--text);cursor:pointer;margin-bottom:8px;font-family:inherit;-webkit-appearance:none;text-align:center;display:block}
+  .export-btn:last-child{margin-bottom:0}
+  .export-btn:active{opacity:0.7}
+  .danger-btn{color:var(--red);border-color:var(--red-border);background:var(--red-bg)}
+  .notif-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .notif-card h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:12px}
+  .time-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .time-btn{padding:10px;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg2);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;text-align:center;font-family:inherit;-webkit-appearance:none}
+  .time-btn.active{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-text)}
+  .enable-btn{width:100%;margin-top:12px;padding:12px;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius-sm);font-size:15px;font-weight:600;color:var(--blue);cursor:pointer;font-family:inherit;-webkit-appearance:none}
+  .notif-status{font-size:12px;color:var(--teal);margin-top:10px;line-height:1.5}
+  .bias-tag{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;margin:2px 2px 4px 0;background:var(--coral-bg);color:var(--coral-text);border:0.5px solid var(--coral-border)}
+  .info-banner{background:var(--blue-bg);border:0.5px solid #B5D4F4;border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}
+  .info-banner p{font-size:13px;color:var(--blue-text);line-height:1.6}
+  .exercise-header{margin-bottom:20px}
+  .exercise-header h2{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
+  .exercise-header p{font-size:13px;color:var(--text2)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+  <div class="header">
+    <h1>Thought tracker</h1>
+    <p id="today-date"></p>
+  </div>
+  <div class="pad">
+    <div class="stat-row">
+      <div class="stat"><div class="stat-num" id="stat-today">0</div><div class="stat-label">Today</div></div>
+      <div class="stat"><div class="stat-num" id="stat-week">0</div><div class="stat-label">This week</div></div>
+      <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+    </div>
+    <div class="section-label">Log a thought</div>
+    <div class="card" onclick="showExercise('thought-log')">
+      <div class="card-title">Thought log</div>
+      <div class="card-desc">Catch automatic thoughts in the moment — situation, emotion, and what went through your mind.</div>
+      <span class="badge badge-blue">Stage 1 — Catching thoughts</span>
+    </div>
+    <div class="card" onclick="showExercise('perspective')">
+      <div class="card-title">Perspective-taking</div>
+      <div class="card-desc">Look at a situation that upset you from different angles using guided prompts.</div>
+      <span class="badge badge-teal">Exercise 1</span>
+    </div>
+    <div class="card" onclick="showExercise('court-trial')">
+      <div class="card-title">Thought on trial</div>
+      <div class="card-desc">Build the case for and against a thought, then deliver a balanced verdict.</div>
+      <span class="badge badge-purple">Exercise 2</span>
+    </div>
+  </div>
+</div>
+
+<!-- LOG -->
+<div id="screen-log" class="screen">
+  <div class="header" style="position:relative">
+    <h1>Your entries</h1>
+    <p id="log-subtitle">All logged thoughts and exercises</p>
+  </div>
+  <div class="pad">
+    <div id="log-list"></div>
+  </div>
+</div>
+
+<!-- GUIDE -->
+<div id="screen-guide" class="screen">
+  <div class="header" style="position:relative">
+    <h1>Reference guide</h1>
+    <p>Full instructions from your therapist's PDF</p>
+  </div>
+  <div class="pad">
+    <div class="ref-section" style="background:var(--blue-bg);border-color:#B5D4F4">
+      <h3 style="color:var(--blue-text)">How CBT works</h3>
+      <p style="color:var(--blue)">The core message: what you think and do affects how you feel. Our thinking can be biased, and different biases lead to different emotional problems. The goal is not to "think happy thoughts" — it is to think accurately.</p>
+      <p style="color:var(--blue)">Thoughts are not facts. Automatic thoughts pop into your mind, feel very believable, but can be inaccurate. The situation does not cause the feeling — your interpretation of it does. Epictetus put it this way nearly 2000 years ago: people are disturbed not by things, but by the notions they form about things.</p>
+    </div>
+
+    <div class="section-label">Common thinking biases</div>
+    <div class="ref-section">
+      <div style="margin-bottom:8px"><span class="bias-tag">Catastrophizing</span><span style="font-size:13px;color:var(--text2)"> Seeing the worst in situations — leads to anxiety</span></div>
+      <div style="margin-bottom:8px"><span class="bias-tag">Excluding the positive</span><span style="font-size:13px;color:var(--text2)"> Discounting or dismissing good things — leads to low mood</span></div>
+      <div><span class="bias-tag">Personalization</span><span style="font-size:13px;color:var(--text2)"> Automatically blaming yourself for everything — leads to sadness and anxiety</span></div>
+    </div>
+
+    <div class="section-label">Exercise instructions</div>
+
+    <div class="ref-acc">
+      <div class="ref-acc-header" onclick="toggleAcc(this)">Stage 1 — Thought log<span class="ref-acc-arrow">▼</span></div>
+      <div class="ref-acc-body">
+        <p>When you notice a shift in how you feel, ask yourself: <em>What was going through my mind just then?</em> Write it down as quickly as possible. Many people find it powerful to see their thoughts recorded.</p>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Aim for a few entries per day at times when you notice obvious emotional changes — not every thought.</p>
+        <div class="ref-step"><div class="ref-step-num">1</div><div class="ref-step-text"><strong>Situation</strong> — Date and time, where you were, who you were with, what was happening just before the emotional shift.</div></div>
+        <div class="ref-step"><div class="ref-step-num">2</div><div class="ref-step-text"><strong>Emotion and body</strong> — Describe the feeling in one word (Anxious, Sad, Angry). Rate intensity 0–100%. Note any physical sensations like tight chest or butterflies.</div></div>
+        <div class="ref-step"><div class="ref-step-num">3</div><div class="ref-step-text"><strong>Thought</strong> — What were you saying to yourself? Any images or memories? Rate how much you believed it 0–100%.</div></div>
+      </div>
+    </div>
+
+    <div class="ref-acc">
+      <div class="ref-acc-header" onclick="toggleAcc(this)">Exercise 1 — Perspective-taking<span class="ref-acc-arrow">▼</span></div>
+      <div class="ref-acc-body">
+        <p>Look at a situation that upset you from different perspectives. This is not about dismissing your feelings — it is about checking whether your interpretation is the only valid one.</p>
+        <div class="ref-step"><div class="ref-step-num">1</div><div class="ref-step-text"><strong>Record the situation</strong> — What happened, who was there, when.</div></div>
+        <div class="ref-step"><div class="ref-step-num">2</div><div class="ref-step-text"><strong>Record how you felt</strong> — Emotion and intensity 0–100%.</div></div>
+        <div class="ref-step"><div class="ref-step-num">3</div><div class="ref-step-text"><strong>Your interpretation</strong> — How did you interpret what happened?</div></div>
+        <div class="ref-step"><div class="ref-step-num">4</div><div class="ref-step-text"><strong>Consider other perspectives</strong> using these prompts:
+          <ul class="prompt-list" style="margin-top:8px">
+            <li>What is another way of looking at this situation?</li>
+            <li>What would a trusted friend say to me?</li>
+            <li>Name 3 good outcomes that might come from this</li>
+            <li>Will this matter to me when I'm 80?</li>
+            <li>How would I respond to this with no fear?</li>
+            <li>What would someone who truly liked themselves think here?</li>
+          </ul>
+        </div></div>
+        <div class="ref-step"><div class="ref-step-num">5</div><div class="ref-step-text"><strong>Reflect</strong> — How do you feel now compared to when you started?</div></div>
+      </div>
+    </div>
+
+    <div class="ref-acc">
+      <div class="ref-acc-header" onclick="toggleAcc(this)">Exercise 2 — Thought on trial<span class="ref-acc-arrow">▼</span></div>
+      <div class="ref-acc-body">
+        <p>Hold an imaginary court case. Your thought is in the dock. Your job is to be the defense, the prosecution, and the judge. Read everything out loud if you can — many people find this creates helpful distance from the thought.</p>
+        <div class="ref-step"><div class="ref-step-num">1</div><div class="ref-step-text"><strong>Put the thought in the dock</strong> — State it clearly. Turn questions into statements: "Why am I so stupid?" becomes "I am so stupid."</div></div>
+        <div class="ref-step"><div class="ref-step-num">2</div><div class="ref-step-text"><strong>Defense</strong> — What evidence supports this thought? Don't censor anything. Ask: "What makes me think this is true?"</div></div>
+        <div class="ref-step"><div class="ref-step-num">3</div><div class="ref-step-text"><strong>Prosecution</strong> — What evidence suggests this thought is not 100% true all the time? Ask yourself: If a friend had this thought, what would I say? When was this thought last untrue? Have there ever been exceptions?</div></div>
+        <div class="ref-step"><div class="ref-step-num">4</div><div class="ref-step-text"><strong>Verdict</strong> — Given all the evidence, what is the fairest, most balanced summary? Write your new thought. Two standards used in courts: "beyond reasonable doubt" or "on the balance of probabilities."</div></div>
+        <div class="ref-step"><div class="ref-step-num">5</div><div class="ref-step-text"><strong>Reflect</strong> — What do you notice about your thoughts and emotions now?</div></div>
+      </div>
+    </div>
+
+    <div class="ref-acc">
+      <div class="ref-acc-header" onclick="toggleAcc(this)">Exercise 3 — Examining evidence (7-column)<span class="ref-acc-arrow">▼</span></div>
+      <div class="ref-acc-body">
+        <p>The traditional CBT method for testing whether a thought is accurate. Similar to the court trial but uses different language. Good to use once you are comfortable with the basics.</p>
+        <div class="ref-step"><div class="ref-step-num">1</div><div class="ref-step-text"><strong>Situation</strong> — Date, time, where, who, what was happening.</div></div>
+        <div class="ref-step"><div class="ref-step-num">2</div><div class="ref-step-text"><strong>Emotion</strong> — Describe and rate intensity 0–100%.</div></div>
+        <div class="ref-step"><div class="ref-step-num">3</div><div class="ref-step-text"><strong>Automatic thought</strong> — State it. Rate how much you believe it 0–100%.</div></div>
+        <div class="ref-step"><div class="ref-step-num">4</div><div class="ref-step-text"><strong>Evidence for</strong> — All reasons the thought might be true.</div></div>
+        <div class="ref-step"><div class="ref-step-num">5</div><div class="ref-step-text"><strong>Evidence against</strong> — All reasons it might not be true all the time.</div></div>
+        <div class="ref-step"><div class="ref-step-num">6</div><div class="ref-step-text"><strong>Alternative thought</strong> — A balanced new thought that accounts for both sides. Rate how much you believe it.</div></div>
+        <div class="ref-step"><div class="ref-step-num">7</div><div class="ref-step-text"><strong>Re-rate emotion</strong> — How do you feel now? What do you notice?</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="screen-settings" class="screen">
+  <div class="header" style="position:relative">
+    <h1>Settings</h1>
+    <p>Reminders and data export</p>
+  </div>
+  <div class="pad">
+    <div class="notif-card">
+      <h3>Daily reminders</h3>
+      <div class="time-grid" id="time-grid">
+        <div class="time-btn active" data-time="morning" onclick="toggleTime(this)">Morning (9am)</div>
+        <div class="time-btn" data-time="midday" onclick="toggleTime(this)">Midday (12pm)</div>
+        <div class="time-btn" data-time="afternoon" onclick="toggleTime(this)">Afternoon (3pm)</div>
+        <div class="time-btn active" data-time="evening" onclick="toggleTime(this)">Evening (7pm)</div>
+      </div>
+      <button class="enable-btn" onclick="requestNotifPermission()">Enable reminders</button>
+      <div id="notif-status" class="notif-status"></div>
+    </div>
+
+    <div class="export-card">
+      <h3>Add to home screen</h3>
+      <p>Open this file in Safari, tap the share icon at the bottom of the screen, then tap <strong>Add to Home Screen</strong>. The app will open fullscreen like a native app. Notifications work once you have granted permission.</p>
+    </div>
+
+    <div class="export-card">
+      <h3>Export your entries</h3>
+      <p>Download a copy of all your logged thoughts and exercises. Use "Share to Files" to save directly to iCloud Drive.</p>
+      <button class="export-btn" onclick="exportText()">Export as plain text</button>
+      <button class="export-btn" onclick="exportJSON()">Export as JSON</button>
+      <button class="export-btn" onclick="shareToFiles()">Share to iCloud Drive / Files app</button>
+    </div>
+
+    <div class="export-card">
+      <h3 style="color:var(--red)">Clear all data</h3>
+      <p>Permanently delete all entries. Export first if you want to keep a copy.</p>
+      <button class="export-btn danger-btn" onclick="clearAll()">Delete all entries</button>
+    </div>
+  </div>
+</div>
+
+<!-- THOUGHT LOG EXERCISE -->
+<div id="screen-thought-log" class="screen">
+  <div class="pad">
+    <button class="back-btn" onclick="showScreen('home')">&#8592; Back</button>
+    <div class="exercise-header">
+      <h2>Thought log</h2>
+      <p>Catch the thought before it fades.</p>
+    </div>
+    <div class="step-indicator">
+      <div class="step-dot active" id="tl-dot-1"></div>
+      <div class="step-dot" id="tl-dot-2"></div>
+      <div class="step-dot" id="tl-dot-3"></div>
+    </div>
+    <div id="tl-step-1">
+      <div class="form-group"><label class="form-label">What was the situation?</label><textarea class="form-input" id="tl-situation" rows="4" placeholder="Where were you? Who were you with? What was happening just before?"></textarea></div>
+      <button class="submit-btn" onclick="tlNext(1)">Next</button>
+    </div>
+    <div id="tl-step-2" style="display:none">
+      <div class="form-group"><label class="form-label">What emotion(s) did you feel?</label><input class="form-input" id="tl-emotion" type="text" placeholder="e.g. Anxious, Sad, Frustrated"></div>
+      <div class="form-group"><label class="form-label">Intensity (0–100%)</label><div class="intensity-row"><input type="range" min="0" max="100" value="50" step="1" id="tl-intensity" oninput="document.getElementById('tl-ival').textContent=this.value+'%'"><div class="intensity-val" id="tl-ival">50%</div></div></div>
+      <div class="form-group"><label class="form-label">Any body sensations? (optional)</label><input class="form-input" id="tl-body" type="text" placeholder="e.g. Tight chest, butterflies in stomach"></div>
+      <button class="submit-btn" onclick="tlNext(2)">Next</button>
+    </div>
+    <div id="tl-step-3" style="display:none">
+      <div class="form-group"><label class="form-label">What was going through your mind?</label><textarea class="form-input" id="tl-thought" rows="4" placeholder="What were you saying to yourself? Any images or memories?"></textarea></div>
+      <div class="form-group"><label class="form-label">How much did you believe it? (0–100%)</label><div class="intensity-row"><input type="range" min="0" max="100" value="70" step="1" id="tl-belief" oninput="document.getElementById('tl-bval').textContent=this.value+'%'"><div class="intensity-val" id="tl-bval">70%</div></div></div>
+      <button class="submit-btn" onclick="saveThoughtLog()">Save entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- PERSPECTIVE EXERCISE -->
+<div id="screen-perspective" class="screen">
+  <div class="pad">
+    <button class="back-btn" onclick="showScreen('home')">&#8592; Back</button>
+    <div class="exercise-header">
+      <h2>Perspective-taking</h2>
+      <p>Step back and consider other viewpoints.</p>
+    </div>
+    <div class="step-indicator">
+      <div class="step-dot active" id="pt-dot-1"></div>
+      <div class="step-dot" id="pt-dot-2"></div>
+      <div class="step-dot" id="pt-dot-3"></div>
+      <div class="step-dot" id="pt-dot-4"></div>
+    </div>
+    <div id="pt-step-1">
+      <div class="form-group"><label class="form-label">What situation bothered you?</label><textarea class="form-input" id="pt-situation" rows="3" placeholder="Who were you with? What happened?"></textarea></div>
+      <div class="form-group"><label class="form-label">How did you feel? Include intensity (0–100%)</label><input class="form-input" id="pt-emotion" type="text" placeholder="e.g. Anxious — 80%"></div>
+      <button class="submit-btn" onclick="ptNext(1)">Next</button>
+    </div>
+    <div id="pt-step-2" style="display:none">
+      <div class="form-group"><label class="form-label">What was your interpretation?</label><textarea class="form-input" id="pt-thought" rows="4" placeholder="How did you interpret what happened? What went through your mind?"></textarea></div>
+      <button class="submit-btn" onclick="ptNext(2)">Next</button>
+    </div>
+    <div id="pt-step-3" style="display:none">
+      <div class="prompt-box blue">
+        <strong style="display:block;margin-bottom:8px">Consider these perspectives:</strong>
+        <ul class="prompt-list">
+          <li>What is another way of looking at this situation?</li>
+          <li>What would a trusted friend say to me?</li>
+          <li>Name 3 good outcomes that might come from this</li>
+          <li>Will this matter to me when I'm 80?</li>
+          <li>How would I respond to this with no fear?</li>
+          <li>What would someone who truly liked themselves think here?</li>
+        </ul>
+      </div>
+      <div class="form-group"><label class="form-label">Write your alternative viewpoint</label><textarea class="form-input" id="pt-alt" rows="4" placeholder="Using the prompts above, how else could you see this situation?"></textarea></div>
+      <button class="submit-btn" onclick="ptNext(3)">Next</button>
+    </div>
+    <div id="pt-step-4" style="display:none">
+      <div class="form-group"><label class="form-label">How do you feel now compared to before?</label><textarea class="form-input" id="pt-reflect" rows="4" placeholder="What did you notice going through this exercise?"></textarea></div>
+      <button class="submit-btn" onclick="savePerspective()">Save entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- COURT TRIAL EXERCISE -->
+<div id="screen-court-trial" class="screen">
+  <div class="pad">
+    <button class="back-btn" onclick="showScreen('home')">&#8592; Back</button>
+    <div class="exercise-header">
+      <h2>Thought on trial</h2>
+      <p>Examine the evidence. Deliver a fair verdict.</p>
+    </div>
+    <div class="step-indicator">
+      <div class="step-dot active" id="ct-dot-1"></div>
+      <div class="step-dot" id="ct-dot-2"></div>
+      <div class="step-dot" id="ct-dot-3"></div>
+      <div class="step-dot" id="ct-dot-4"></div>
+    </div>
+    <div id="ct-step-1">
+      <div class="form-group"><label class="form-label">Put your thought in the dock</label><textarea class="form-input" id="ct-thought" rows="4" placeholder="State the negative thought troubling you. Turn questions into statements — 'Why am I so stupid?' becomes 'I am so stupid.'"></textarea></div>
+      <button class="submit-btn" onclick="ctNext(1)">Next — build the defense</button>
+    </div>
+    <div id="ct-step-2" style="display:none">
+      <div class="prompt-box coral"><strong>Defense</strong><p style="margin-top:4px;font-size:13px;color:var(--coral-body)">What evidence supports this thought? Don't censor — write it all down.</p></div>
+      <div class="form-group"><textarea class="form-input" id="ct-defense" rows="5" placeholder="List every reason this thought might be true..."></textarea></div>
+      <button class="submit-btn" onclick="ctNext(2)">Next — build the prosecution</button>
+    </div>
+    <div id="ct-step-3" style="display:none">
+      <div class="prompt-box blue"><strong>Prosecution</strong><p style="margin-top:4px;font-size:13px">What evidence suggests this thought is not 100% true all the time?</p><ul class="prompt-list" style="margin-top:8px"><li>If a friend had this thought, what would I say?</li><li>When was this thought last untrue?</li><li>Have there ever been exceptions?</li></ul></div>
+      <div class="form-group"><textarea class="form-input" id="ct-prosecution" rows="5" placeholder="List every reason this thought might not be fully accurate..."></textarea></div>
+      <button class="submit-btn" onclick="ctNext(3)">Next — deliver the verdict</button>
+    </div>
+    <div id="ct-step-4" style="display:none">
+      <div class="prompt-box purple"><strong>Verdict</strong><p style="margin-top:4px;font-size:13px">Having weighed both sides — what is the fairest, most balanced summary?</p></div>
+      <div class="form-group"><textarea class="form-input" id="ct-verdict" rows="4" placeholder="Given all the evidence, what is a more balanced way of seeing this?"></textarea></div>
+      <button class="submit-btn" onclick="saveCourtTrial()">Save entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-home" onclick="switchTab('home')"><span class="tab-icon">🏠</span><span class="tab-label">Home</span></button>
+  <button class="tab-btn" id="tab-log" onclick="switchTab('log')"><span class="tab-icon">📋</span><span class="tab-label">Log</span></button>
+  <button class="tab-btn" id="tab-guide" onclick="switchTab('guide')"><span class="tab-icon">📖</span><span class="tab-label">Guide</span></button>
+  <button class="tab-btn" id="tab-settings" onclick="switchTab('settings')"><span class="tab-icon">⚙️</span><span class="tab-label">Settings</span></button>
+</div>
+
+</div>
+
+<script>
+const SK='cbt_tracker_v2';
+function getEntries(){try{return JSON.parse(localStorage.getItem(SK)||'[]')}catch{return[]}}
+function saveEntries(e){localStorage.setItem(SK,JSON.stringify(e))}
+
+const screenMap={
+  home:'screen-home',log:'screen-log',guide:'screen-guide',settings:'screen-settings',
+  'thought-log':'screen-thought-log',perspective:'screen-perspective','court-trial':'screen-court-trial'
+};
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(screenMap[name]);
+  if(el){el.classList.add('active');window.scrollTo(0,0);}
+  if(name==='home')updateStats();
+  if(name==='log')renderLog();
+}
+
+function showExercise(name){
+  if(name==='thought-log')resetTL();
+  if(name==='perspective')resetPT();
+  if(name==='court-trial')resetCT();
+  showScreen(name);
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  showScreen(tab);
+}
+
+function updateStats(){
+  const e=getEntries(),now=new Date(),tod=now.toDateString(),wk=new Date(now-7*864e5);
+  document.getElementById('stat-today').textContent=e.filter(x=>new Date(x.ts).toDateString()===tod).length;
+  document.getElementById('stat-week').textContent=e.filter(x=>new Date(x.ts)>=wk).length;
+  document.getElementById('stat-total').textContent=e.length;
+  document.getElementById('today-date').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+}
+
+function renderLog(){
+  const entries=getEntries().slice().reverse();
+  const el=document.getElementById('log-list');
+  const sub=document.getElementById('log-subtitle');
+  sub.textContent=entries.length+' total entr'+(entries.length===1?'y':'ies');
+  if(!entries.length){el.innerHTML='<div class="empty-state">No entries yet.<br>Log your first thought from the home tab.</div>';return}
+  const labels={'thought-log':'Thought log',perspective:'Perspective-taking','court-trial':'Thought on trial'};
+  el.innerHTML=entries.map((e,i)=>{
+    const date=new Date(e.ts).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    const thought=e.thought||'(no thought recorded)';
+    const emotion=e.emotion?`<div class="log-item-emotion">${e.emotion}${e.intensity?' &middot; '+e.intensity+'%':''}</div>`:'';
+    return`<div class="log-item"><div class="log-item-header"><span class="log-item-type">${labels[e.type]||e.type}</span><div style="display:flex;gap:8px;align-items:center"><span class="log-item-time">${date}</span><button class="delete-btn" onclick="deleteEntry(${entries.length-1-i})">Delete</button></div></div><div class="log-item-thought">${thought}</div>${emotion}</div>`;
+  }).join('');
+}
+
+function deleteEntry(idx){
+  if(!confirm('Delete this entry?'))return;
+  const e=getEntries();e.splice(idx,1);saveEntries(e);renderLog();updateStats();
+}
+
+function toggleAcc(header){
+  const body=header.nextElementSibling;
+  const arrow=header.querySelector('.ref-acc-arrow');
+  const open=body.classList.toggle('open');
+  arrow.classList.toggle('open',open);
+}
+
+// Thought log
+let tlStep=1;
+function resetTL(){
+  tlStep=1;
+  ['tl-situation','tl-emotion','tl-body','tl-thought'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const ti=document.getElementById('tl-intensity');if(ti){ti.value=50;document.getElementById('tl-ival').textContent='50%';}
+  const tb=document.getElementById('tl-belief');if(tb){tb.value=70;document.getElementById('tl-bval').textContent='70%';}
+  setTLStep(1);
+}
+function setTLStep(s){for(let i=1;i<=3;i++){document.getElementById('tl-step-'+i).style.display=i===s?'block':'none';const d=document.getElementById('tl-dot-'+i);d.className='step-dot'+(i<s?' done':i===s?' active':'');}}
+function tlNext(s){
+  if(s===1&&!document.getElementById('tl-situation').value.trim()){alert('Please describe the situation.');return;}
+  if(s===2&&!document.getElementById('tl-emotion').value.trim()){alert('Please describe how you felt.');return;}
+  setTLStep(++tlStep);
+}
+function saveThoughtLog(){
+  if(!document.getElementById('tl-thought').value.trim()){alert('Please record the thought.');return;}
+  addEntry({type:'thought-log',situation:document.getElementById('tl-situation').value,emotion:document.getElementById('tl-emotion').value,intensity:document.getElementById('tl-intensity').value,body:document.getElementById('tl-body').value,thought:document.getElementById('tl-thought').value,belief:document.getElementById('tl-belief').value});
+}
+
+// Perspective
+let ptStep=1;
+function resetPT(){ptStep=1;['pt-situation','pt-emotion','pt-thought','pt-alt','pt-reflect'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});setPTStep(1);}
+function setPTStep(s){for(let i=1;i<=4;i++){document.getElementById('pt-step-'+i).style.display=i===s?'block':'none';const d=document.getElementById('pt-dot-'+i);d.className='step-dot'+(i<s?' done':i===s?' active':'');}}
+function ptNext(s){
+  if(s===1&&(!document.getElementById('pt-situation').value.trim()||!document.getElementById('pt-emotion').value.trim())){alert('Please fill in both fields.');return;}
+  if(s===2&&!document.getElementById('pt-thought').value.trim()){alert('Please record your interpretation.');return;}
+  if(s===3&&!document.getElementById('pt-alt').value.trim()){alert('Please write an alternative viewpoint.');return;}
+  setPTStep(++ptStep);
+}
+function savePerspective(){
+  if(!document.getElementById('pt-reflect').value.trim()){alert('Please add your reflection.');return;}
+  addEntry({type:'perspective',situation:document.getElementById('pt-situation').value,emotion:document.getElementById('pt-emotion').value,thought:document.getElementById('pt-thought').value,alternative:document.getElementById('pt-alt').value,reflection:document.getElementById('pt-reflect').value});
+}
+
+// Court trial
+let ctStep=1;
+function resetCT(){ctStep=1;['ct-thought','ct-defense','ct-prosecution','ct-verdict'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});setCTStep(1);}
+function setCTStep(s){for(let i=1;i<=4;i++){document.getElementById('ct-step-'+i).style.display=i===s?'block':'none';const d=document.getElementById('ct-dot-'+i);d.className='step-dot'+(i<s?' done':i===s?' active':'');}}
+function ctNext(s){
+  if(s===1&&!document.getElementById('ct-thought').value.trim()){alert('Please state the thought.');return;}
+  if(s===2&&!document.getElementById('ct-defense').value.trim()){alert('Please record some defense evidence.');return;}
+  if(s===3&&!document.getElementById('ct-prosecution').value.trim()){alert('Please record some prosecution evidence.');return;}
+  setCTStep(++ctStep);
+}
+function saveCourtTrial(){
+  if(!document.getElementById('ct-verdict').value.trim()){alert('Please write your verdict.');return;}
+  addEntry({type:'court-trial',thought:document.getElementById('ct-thought').value,defense:document.getElementById('ct-defense').value,prosecution:document.getElementById('ct-prosecution').value,verdict:document.getElementById('ct-verdict').value});
+}
+
+function addEntry(data){
+  const entries=getEntries();entries.push({...data,ts:Date.now()});saveEntries(entries);
+  showScreen('home');updateStats();
+}
+
+function toggleTime(el){el.classList.toggle('active');}
+
+async function requestNotifPermission(){
+  const statusEl=document.getElementById('notif-status');
+  if(!('Notification' in window)){statusEl.textContent='Notifications not supported. Add to home screen first, then try again.';return;}
+  const perm=await Notification.requestPermission();
+  if(perm==='granted'){statusEl.textContent='Reminders enabled for your selected times.';scheduleNotifications();}
+  else{statusEl.textContent='Permission denied. Go to Settings > Safari > [this site] to enable notifications.';}
+}
+
+function scheduleNotifications(){
+  const times={morning:9,midday:12,afternoon:15,evening:19};
+  Array.from(document.querySelectorAll('.time-btn.active')).forEach(b=>{
+    const h=times[b.dataset.time],now=new Date(),target=new Date();
+    target.setHours(h,0,0,0);if(target<=now)target.setDate(target.getDate()+1);
+    setTimeout(()=>{if(Notification.permission==='granted')new Notification('Time to check in',{body:'How are you feeling right now? Open the thought tracker to log a thought.'});},target-now);
+  });
+}
+
+function formatEntryText(e){
+  const d=new Date(e.ts).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'});
+  const labels={'thought-log':'THOUGHT LOG','perspective':'PERSPECTIVE-TAKING','court-trial':'THOUGHT ON TRIAL'};
+  let lines=[`[${labels[e.type]||e.type}] — ${d}`,'─'.repeat(44)];
+  if(e.situation)lines.push('Situation: '+e.situation);
+  if(e.emotion)lines.push('Emotion: '+e.emotion+(e.intensity?' ('+e.intensity+'%)':''));
+  if(e.body)lines.push('Body: '+e.body);
+  if(e.thought)lines.push('Thought: '+e.thought);
+  if(e.belief)lines.push('Belief strength: '+e.belief+'%');
+  if(e.alternative)lines.push('Alternative view: '+e.alternative);
+  if(e.reflection)lines.push('Reflection: '+e.reflection);
+  if(e.defense)lines.push('Defense (for): '+e.defense);
+  if(e.prosecution)lines.push('Prosecution (against): '+e.prosecution);
+  if(e.verdict)lines.push('Verdict: '+e.verdict);
+  return lines.join('\n')+'\n';
+}
+
+function exportJSON(){
+  const data=getEntries();if(!data.length){alert('No entries to export yet.');return;}
+  triggerDownload(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'thought-tracker.json');
+}
+
+function exportText(){
+  const data=getEntries();if(!data.length){alert('No entries to export yet.');return;}
+  triggerDownload(new Blob([data.map(formatEntryText).join('\n')],{type:'text/plain'}),'thought-tracker.txt');
+}
+
+function triggerDownload(blob,filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+async function shareToFiles(){
+  const data=getEntries();if(!data.length){alert('No entries to export yet.');return;}
+  const text=data.map(formatEntryText).join('\n');
+  const filename='thought-tracker-'+new Date().toISOString().slice(0,10)+'.txt';
+  const file=new File([text],filename,{type:'text/plain'});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:'Thought tracker export'});}
+    catch(e){if(e.name!=='AbortError')exportText();}
+  }else{
+    exportText();
+    alert('Share sheet not available here. File downloaded — you can move it to iCloud Drive from the Files app.');
+  }
+}
+
+function clearAll(){
+  if(!confirm('Delete all entries permanently? This cannot be undone. Export first if you want to keep a copy.'))return;
+  localStorage.removeItem(SK);updateStats();renderLog();alert('All entries deleted.');
+}
+
+updateStats();
+</script>
+</body>
+</html>
