@@ -283,6 +283,7 @@
       <button class="export-btn" onclick="exportText()">Export as plain text</button>
       <button class="export-btn" onclick="exportJSON()">Export as JSON</button>
       <button class="export-btn" onclick="shareToFiles()">Share to iCloud Drive / Files app</button>
+      <button class="export-btn" onclick="importJSON()">Restore from JSON backup</button>
     </div>
 
     <div class="export-card">
@@ -292,7 +293,7 @@
     </div>
 
     <div class="export-card" style="text-align:center">
-      <p style="color:var(--text3);font-size:0.85em">Version 1.0.2</p>
+      <p style="color:var(--text3);font-size:0.85em">Version 1.0.3</p>
     </div>
   </div>
 </div>
@@ -603,6 +604,28 @@ async function shareToFiles(){
     exportText();
     alert('Share sheet not available here. File downloaded — you can move it to iCloud Drive from the Files app.');
   }
+}
+
+function importJSON(){
+  const input=document.createElement('input');input.type='file';input.accept='application/json,.json';
+  input.onchange=function(e){
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        const imported=JSON.parse(ev.target.result);
+        if(!Array.isArray(imported))throw new Error();
+        const existing=getEntries();
+        const existingTs=new Set(existing.map(e=>e.ts));
+        const merged=existing.concat(imported.filter(e=>e.ts&&!existingTs.has(e.ts)));
+        merged.sort((a,b)=>a.ts-b.ts);
+        saveEntries(merged);updateStats();renderLog();
+        alert('Imported '+( merged.length-existing.length)+' new entr'+(merged.length-existing.length===1?'y':'ies')+'.');
+      }catch{alert('Could not read file. Make sure it is a JSON export from this app.');}
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
 
 function clearAll(){
