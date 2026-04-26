@@ -49,6 +49,7 @@
   .badge-blue{background:var(--blue-bg);color:var(--blue-text)}
   .badge-teal{background:var(--teal-bg);color:var(--teal-text)}
   .badge-purple{background:var(--purple-bg);color:var(--purple-text)}
+  .badge-coral{background:var(--coral-bg);color:var(--coral-text);border:0.5px solid var(--coral-border)}
   .stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
   .stat{background:var(--bg);border-radius:var(--radius-sm);padding:12px;text-align:center;border:0.5px solid var(--border)}
   .stat-num{font-size:26px;font-weight:700;color:var(--text)}
@@ -111,6 +112,32 @@
   .export-btn:last-child{margin-bottom:0}
   .export-btn:active{opacity:0.7}
   .danger-btn{color:var(--red);border-color:var(--red-border);background:var(--red-bg)}
+  .feeling-row{margin-bottom:14px;padding-bottom:14px;border-bottom:0.5px solid var(--border)}
+  .feeling-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+  .feeling-name-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  .feeling-name-row .form-input{flex:1;margin-bottom:0}
+  .remove-feeling-btn{flex-shrink:0;width:32px;height:32px;border-radius:50%;border:0.5px solid var(--red-border);background:var(--red-bg);color:var(--red);font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+  .feeling-pct{width:56px;text-align:center;padding:8px 4px;-moz-appearance:textfield;flex-shrink:0}
+  .feeling-pct::-webkit-outer-spin-button,.feeling-pct::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .pct-label{font-size:14px;font-weight:600;color:var(--text2);flex-shrink:0}
+  .add-feeling-btn{width:100%;padding:11px;border:0.5px dashed var(--border2);border-radius:var(--radius-sm);background:transparent;font-size:15px;color:var(--blue);cursor:pointer;font-family:inherit;margin-top:10px}
+  .log-item{cursor:pointer;border-left:3px solid transparent}
+  .log-item:active{opacity:0.7}
+  .log-item-chevron{font-size:14px;color:var(--text3)}
+  .log-item[data-type="thought-log"]{border-left-color:var(--blue)}
+  .log-item[data-type="perspective"]{border-left-color:var(--teal)}
+  .log-item[data-type="court-trial"]{border-left-color:var(--coral-text)}
+  .log-item[data-type="examining-evidence"]{border-left-color:var(--purple)}
+  .detail-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .detail-nav .back-btn{margin-bottom:0}
+  .detail-header{margin-bottom:20px;padding-bottom:16px;border-bottom:0.5px solid var(--border)}
+  .detail-date{font-size:13px;color:var(--text2);margin-top:4px}
+  .detail-section{margin-bottom:16px;padding-bottom:16px;border-bottom:0.5px solid var(--border)}
+  .detail-section:last-child{border-bottom:none}
+  .detail-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+  .detail-value{font-size:15px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+  .detail-feelings{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+  .detail-feeling-chip{background:var(--blue-bg);border:0.5px solid #B5D4F4;border-radius:20px;padding:5px 12px;font-size:13px;color:var(--blue-text)}
   .notif-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
   .notif-card h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:12px}
   .time-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -156,6 +183,11 @@
       <div class="card-title">Thought on trial</div>
       <div class="card-desc">Build the case for and against a thought, then deliver a balanced verdict.</div>
       <span class="badge badge-purple">Exercise 2</span>
+    </div>
+    <div class="card" onclick="showExercise('examining-evidence')">
+      <div class="card-title">Examining evidence</div>
+      <div class="card-desc">Test an automatic thought using the classic 7-column CBT method — weigh evidence on both sides, then find a balanced alternative.</div>
+      <span class="badge badge-coral">Exercise 3</span>
     </div>
   </div>
 </div>
@@ -278,6 +310,12 @@
     </div>
 
     <div class="export-card">
+      <h3>Share with therapist</h3>
+      <p>Generate a formatted, readable report of all your entries. In Safari tap Print → Save to Files as a PDF, or AirDrop directly.</p>
+      <button class="export-btn" onclick="exportPDF()">Generate PDF report</button>
+    </div>
+
+    <div class="export-card">
       <h3>Export your entries</h3>
       <p>Download a copy of all your logged thoughts and exercises. Use "Share to Files" to save directly to iCloud Drive.</p>
       <button class="export-btn" onclick="exportText()">Export as plain text</button>
@@ -293,7 +331,7 @@
     </div>
 
     <div class="export-card" style="text-align:center">
-      <p style="color:var(--text3);font-size:0.85em">Version 1.0.3</p>
+      <p style="color:var(--text3);font-size:0.85em">Version 1.0.4</p>
     </div>
   </div>
 </div>
@@ -316,8 +354,11 @@
       <button class="submit-btn" onclick="tlNext(1)">Next</button>
     </div>
     <div id="tl-step-2" style="display:none">
-      <div class="form-group"><label class="form-label">What emotion(s) did you feel?</label><input class="form-input" id="tl-emotion" type="text" placeholder="e.g. Anxious, Sad, Frustrated"></div>
-      <div class="form-group"><label class="form-label">Intensity (0–100%)</label><div class="intensity-row"><input type="range" min="0" max="100" value="50" step="1" id="tl-intensity" oninput="document.getElementById('tl-ival').textContent=this.value+'%'"><div class="intensity-val" id="tl-ival">50%</div></div></div>
+      <div class="form-group">
+        <label class="form-label">What emotion(s) did you feel?</label>
+        <div id="tl-feelings-list"></div>
+        <button class="add-feeling-btn" type="button" onclick="addFeeling('tl-feelings-list')">+ Add another feeling</button>
+      </div>
       <div class="form-group"><label class="form-label">Any body sensations? (optional)</label><input class="form-input" id="tl-body" type="text" placeholder="e.g. Tight chest, butterflies in stomach"></div>
       <button class="submit-btn" onclick="tlNext(2)">Next</button>
     </div>
@@ -345,7 +386,11 @@
     </div>
     <div id="pt-step-1">
       <div class="form-group"><label class="form-label">What situation bothered you?</label><textarea class="form-input" id="pt-situation" rows="3" placeholder="Who were you with? What happened?"></textarea></div>
-      <div class="form-group"><label class="form-label">How did you feel? Include intensity (0–100%)</label><input class="form-input" id="pt-emotion" type="text" placeholder="e.g. Anxious — 80%"></div>
+      <div class="form-group">
+        <label class="form-label">How did you feel?</label>
+        <div id="pt-feelings-list"></div>
+        <button class="add-feeling-btn" type="button" onclick="addFeeling('pt-feelings-list')">+ Add another feeling</button>
+      </div>
       <button class="submit-btn" onclick="ptNext(1)">Next</button>
     </div>
     <div id="pt-step-2" style="display:none">
@@ -410,6 +455,65 @@
   </div>
 </div>
 
+<!-- EXAMINING EVIDENCE EXERCISE -->
+<div id="screen-examining-evidence" class="screen">
+  <div class="pad">
+    <button class="back-btn" onclick="showScreen('home')">&#8592; Back</button>
+    <div class="exercise-header">
+      <h2>Examining evidence</h2>
+      <p>Test your thought against the evidence.</p>
+    </div>
+    <div class="step-indicator">
+      <div class="step-dot active" id="ee-dot-1"></div>
+      <div class="step-dot" id="ee-dot-2"></div>
+      <div class="step-dot" id="ee-dot-3"></div>
+      <div class="step-dot" id="ee-dot-4"></div>
+    </div>
+    <div id="ee-step-1">
+      <div class="form-group"><label class="form-label">What was the situation?</label><textarea class="form-input" id="ee-situation" rows="3" placeholder="Date, time, where you were, who was there, what was happening."></textarea></div>
+      <div class="form-group">
+        <label class="form-label">How were you feeling?</label>
+        <div id="ee-feelings-list"></div>
+        <button class="add-feeling-btn" type="button" onclick="addFeeling('ee-feelings-list')">+ Add another feeling</button>
+      </div>
+      <button class="submit-btn" onclick="eeNext(1)">Next</button>
+    </div>
+    <div id="ee-step-2" style="display:none">
+      <div class="form-group"><label class="form-label">What was the automatic thought?</label><textarea class="form-input" id="ee-thought" rows="4" placeholder="State it clearly."></textarea></div>
+      <div class="form-group"><label class="form-label">How much do you believe it? (0–100%)</label><div class="intensity-row"><input type="range" min="0" max="100" value="70" step="1" id="ee-belief" oninput="document.getElementById('ee-bval').textContent=this.value+'%'"><div class="intensity-val" id="ee-bval">70%</div></div></div>
+      <button class="submit-btn" onclick="eeNext(2)">Next — examine the evidence</button>
+    </div>
+    <div id="ee-step-3" style="display:none">
+      <div class="prompt-box coral"><strong>Evidence for</strong><p style="margin-top:4px;font-size:13px;color:var(--coral-body)">All reasons this thought might be true.</p></div>
+      <div class="form-group"><textarea class="form-input" id="ee-evidence-for" rows="4" placeholder="List everything that supports this thought..."></textarea></div>
+      <div class="prompt-box blue" style="margin-top:4px"><strong>Evidence against</strong><p style="margin-top:4px;font-size:13px">All reasons it might not be true all the time.</p></div>
+      <div class="form-group"><textarea class="form-input" id="ee-evidence-against" rows="4" placeholder="List everything that contradicts or limits this thought..."></textarea></div>
+      <button class="submit-btn" onclick="eeNext(3)">Next — find an alternative</button>
+    </div>
+    <div id="ee-step-4" style="display:none">
+      <div class="form-group"><label class="form-label">What is a balanced alternative thought?</label><textarea class="form-input" id="ee-alt-thought" rows="4" placeholder="A fair summary that accounts for both sides of the evidence..."></textarea></div>
+      <div class="form-group"><label class="form-label">How much do you believe the alternative? (0–100%)</label><div class="intensity-row"><input type="range" min="0" max="100" value="50" step="1" id="ee-alt-belief" oninput="document.getElementById('ee-abval').textContent=this.value+'%'"><div class="intensity-val" id="ee-abval">50%</div></div></div>
+      <div class="form-group">
+        <label class="form-label">Re-rate your feelings now</label>
+        <div id="ee-rerate-list"></div>
+        <button class="add-feeling-btn" type="button" onclick="addFeeling('ee-rerate-list')">+ Add another feeling</button>
+      </div>
+      <button class="submit-btn" onclick="saveExaminingEvidence()">Save entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- ENTRY DETAIL -->
+<div id="screen-entry-detail" class="screen">
+  <div class="pad">
+    <div class="detail-nav">
+      <button class="back-btn" onclick="showScreen('log')">&#8592; Back to log</button>
+      <button class="delete-btn" id="detail-delete-btn">Delete</button>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
 <!-- TAB BAR -->
 <div class="tab-bar">
   <button class="tab-btn active" id="tab-home" onclick="switchTab('home')"><span class="tab-icon">🏠</span><span class="tab-label">Home</span></button>
@@ -427,7 +531,8 @@ function saveEntries(e){localStorage.setItem(SK,JSON.stringify(e))}
 
 const screenMap={
   home:'screen-home',log:'screen-log',guide:'screen-guide',settings:'screen-settings',
-  'thought-log':'screen-thought-log',perspective:'screen-perspective','court-trial':'screen-court-trial'
+  'thought-log':'screen-thought-log',perspective:'screen-perspective','court-trial':'screen-court-trial',
+  'examining-evidence':'screen-examining-evidence','entry-detail':'screen-entry-detail'
 };
 
 function showScreen(name){
@@ -442,6 +547,7 @@ function showExercise(name){
   if(name==='thought-log')resetTL();
   if(name==='perspective')resetPT();
   if(name==='court-trial')resetCT();
+  if(name==='examining-evidence')resetEE();
   showScreen(name);
 }
 
@@ -459,18 +565,27 @@ function updateStats(){
   document.getElementById('today-date').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
 }
 
+function feelingsSummary(e){
+  if(e.feelings&&e.feelings.length)return e.feelings.map(f=>f.name+' '+f.intensity+'%').join(' · ');
+  if(e.emotion)return e.emotion+(e.intensity?' '+e.intensity+'%':'');
+  return'';
+}
+
 function renderLog(){
-  const entries=getEntries().slice().reverse();
+  const all=getEntries();
+  const entries=all.slice().reverse();
   const el=document.getElementById('log-list');
   const sub=document.getElementById('log-subtitle');
   sub.textContent=entries.length+' total entr'+(entries.length===1?'y':'ies');
   if(!entries.length){el.innerHTML='<div class="empty-state">No entries yet.<br>Log your first thought from the home tab.</div>';return}
-  const labels={'thought-log':'Thought log',perspective:'Perspective-taking','court-trial':'Thought on trial'};
+  const labels={'thought-log':'Thought log',perspective:'Perspective-taking','court-trial':'Thought on trial','examining-evidence':'Examining evidence'};
   el.innerHTML=entries.map((e,i)=>{
+    const origIdx=all.length-1-i;
     const date=new Date(e.ts).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
-    const thought=e.thought||'(no thought recorded)';
-    const emotion=e.emotion?`<div class="log-item-emotion">${e.emotion}${e.intensity?' &middot; '+e.intensity+'%':''}</div>`:'';
-    return`<div class="log-item"><div class="log-item-header"><span class="log-item-type">${labels[e.type]||e.type}</span><div style="display:flex;gap:8px;align-items:center"><span class="log-item-time">${date}</span><button class="delete-btn" onclick="deleteEntry(${entries.length-1-i})">Delete</button></div></div><div class="log-item-thought">${thought}</div>${emotion}</div>`;
+    const thought=(e.thought||e.altThought||'(no thought recorded)').replace(/</g,'&lt;');
+    const summary=feelingsSummary(e);
+    const emotionLine=summary?`<div class="log-item-emotion">${summary}</div>`:'';
+    return`<div class="log-item" data-type="${e.type}" onclick="showEntryDetail(${origIdx})"><div class="log-item-header"><span class="log-item-type">${labels[e.type]||e.type}</span><div style="display:flex;gap:8px;align-items:center"><span class="log-item-time">${date}</span><span class="log-item-chevron">›</span></div></div><div class="log-item-thought">${thought}</div>${emotionLine}</div>`;
   }).join('');
 }
 
@@ -486,39 +601,54 @@ function toggleAcc(header){
   arrow.classList.toggle('open',open);
 }
 
+// Generic feeling-row helpers (shared by all exercises)
+function makeFeelingRowHTML(name,pct){
+  name=name||'';pct=pct==null?50:pct;
+  return`<div class="feeling-row"><div class="feeling-name-row"><input class="form-input feeling-name" type="text" placeholder="Emotion, e.g. Anxious" value="${name}"><button class="remove-feeling-btn" type="button" onclick="removeFeeling(this)">×</button></div><div class="intensity-row"><input type="range" min="0" max="100" value="${pct}" step="1" class="feeling-slider" oninput="this.closest('.feeling-row').querySelector('.feeling-pct').value=this.value"><input type="number" min="0" max="100" value="${pct}" class="feeling-pct form-input" inputmode="numeric" oninput="var v=Math.min(100,Math.max(0,parseInt(this.value)||0));this.value=v;this.closest('.feeling-row').querySelector('.feeling-slider').value=v"><span class="pct-label">%</span></div></div>`;
+}
+function addFeeling(listId){document.getElementById(listId).insertAdjacentHTML('beforeend',makeFeelingRowHTML());}
+function removeFeeling(btn){const list=btn.closest('.feeling-row').parentElement;if(list.children.length<=1)return;btn.closest('.feeling-row').remove();}
+function collectFeelings(listId){return Array.from(document.querySelectorAll('#'+listId+' .feeling-row')).map(r=>({name:r.querySelector('.feeling-name').value.trim(),intensity:parseInt(r.querySelector('.feeling-pct').value)||0})).filter(f=>f.name);}
+function initFeelingsList(listId){document.getElementById(listId).innerHTML=makeFeelingRowHTML();}
+
 // Thought log
 let tlStep=1;
 function resetTL(){
   tlStep=1;
-  ['tl-situation','tl-emotion','tl-body','tl-thought'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  const ti=document.getElementById('tl-intensity');if(ti){ti.value=50;document.getElementById('tl-ival').textContent='50%';}
+  ['tl-situation','tl-body','tl-thought'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  initFeelingsList('tl-feelings-list');
   const tb=document.getElementById('tl-belief');if(tb){tb.value=70;document.getElementById('tl-bval').textContent='70%';}
   setTLStep(1);
 }
 function setTLStep(s){for(let i=1;i<=3;i++){document.getElementById('tl-step-'+i).style.display=i===s?'block':'none';const d=document.getElementById('tl-dot-'+i);d.className='step-dot'+(i<s?' done':i===s?' active':'');}}
 function tlNext(s){
   if(s===1&&!document.getElementById('tl-situation').value.trim()){alert('Please describe the situation.');return;}
-  if(s===2&&!document.getElementById('tl-emotion').value.trim()){alert('Please describe how you felt.');return;}
+  if(s===2&&!collectFeelings('tl-feelings-list').length){alert('Please add at least one emotion.');return;}
   setTLStep(++tlStep);
 }
 function saveThoughtLog(){
   if(!document.getElementById('tl-thought').value.trim()){alert('Please record the thought.');return;}
-  addEntry({type:'thought-log',situation:document.getElementById('tl-situation').value,emotion:document.getElementById('tl-emotion').value,intensity:document.getElementById('tl-intensity').value,body:document.getElementById('tl-body').value,thought:document.getElementById('tl-thought').value,belief:document.getElementById('tl-belief').value});
+  addEntry({type:'thought-log',situation:document.getElementById('tl-situation').value,feelings:collectFeelings('tl-feelings-list'),body:document.getElementById('tl-body').value,thought:document.getElementById('tl-thought').value,belief:document.getElementById('tl-belief').value});
 }
 
 // Perspective
 let ptStep=1;
-function resetPT(){ptStep=1;['pt-situation','pt-emotion','pt-thought','pt-alt','pt-reflect'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});setPTStep(1);}
+function resetPT(){
+  ptStep=1;
+  ['pt-situation','pt-thought','pt-alt','pt-reflect'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  initFeelingsList('pt-feelings-list');
+  setPTStep(1);
+}
 function setPTStep(s){for(let i=1;i<=4;i++){document.getElementById('pt-step-'+i).style.display=i===s?'block':'none';const d=document.getElementById('pt-dot-'+i);d.className='step-dot'+(i<s?' done':i===s?' active':'');}}
 function ptNext(s){
-  if(s===1&&(!document.getElementById('pt-situation').value.trim()||!document.getElementById('pt-emotion').value.trim())){alert('Please fill in both fields.');return;}
+  if(s===1&&(!document.getElementById('pt-situation').value.trim()||!collectFeelings('pt-feelings-list').length)){alert('Please fill in the situation and at least one feeling.');return;}
   if(s===2&&!document.getElementById('pt-thought').value.trim()){alert('Please record your interpretation.');return;}
   if(s===3&&!document.getElementById('pt-alt').value.trim()){alert('Please write an alternative viewpoint.');return;}
   setPTStep(++ptStep);
 }
 function savePerspective(){
   if(!document.getElementById('pt-reflect').value.trim()){alert('Please add your reflection.');return;}
-  addEntry({type:'perspective',situation:document.getElementById('pt-situation').value,emotion:document.getElementById('pt-emotion').value,thought:document.getElementById('pt-thought').value,alternative:document.getElementById('pt-alt').value,reflection:document.getElementById('pt-reflect').value});
+  addEntry({type:'perspective',situation:document.getElementById('pt-situation').value,feelings:collectFeelings('pt-feelings-list'),thought:document.getElementById('pt-thought').value,alternative:document.getElementById('pt-alt').value,reflection:document.getElementById('pt-reflect').value});
 }
 
 // Court trial
@@ -534,6 +664,68 @@ function ctNext(s){
 function saveCourtTrial(){
   if(!document.getElementById('ct-verdict').value.trim()){alert('Please write your verdict.');return;}
   addEntry({type:'court-trial',thought:document.getElementById('ct-thought').value,defense:document.getElementById('ct-defense').value,prosecution:document.getElementById('ct-prosecution').value,verdict:document.getElementById('ct-verdict').value});
+}
+
+// Examining evidence
+let eeStep=1;
+function resetEE(){
+  eeStep=1;
+  ['ee-situation','ee-thought','ee-evidence-for','ee-evidence-against','ee-alt-thought'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  initFeelingsList('ee-feelings-list');
+  initFeelingsList('ee-rerate-list');
+  const eb=document.getElementById('ee-belief');if(eb){eb.value=70;document.getElementById('ee-bval').textContent='70%';}
+  const eab=document.getElementById('ee-alt-belief');if(eab){eab.value=50;document.getElementById('ee-abval').textContent='50%';}
+  setEEStep(1);
+}
+function setEEStep(s){for(let i=1;i<=4;i++){document.getElementById('ee-step-'+i).style.display=i===s?'block':'none';const d=document.getElementById('ee-dot-'+i);d.className='step-dot'+(i<s?' done':i===s?' active':'');}}
+function eeNext(s){
+  if(s===1&&(!document.getElementById('ee-situation').value.trim()||!collectFeelings('ee-feelings-list').length)){alert('Please fill in the situation and at least one feeling.');return;}
+  if(s===2&&!document.getElementById('ee-thought').value.trim()){alert('Please record the automatic thought.');return;}
+  if(s===3&&(!document.getElementById('ee-evidence-for').value.trim()||!document.getElementById('ee-evidence-against').value.trim())){alert('Please fill in both evidence fields.');return;}
+  setEEStep(++eeStep);
+}
+function saveExaminingEvidence(){
+  if(!document.getElementById('ee-alt-thought').value.trim()){alert('Please write your alternative thought.');return;}
+  addEntry({type:'examining-evidence',situation:document.getElementById('ee-situation').value,feelings:collectFeelings('ee-feelings-list'),thought:document.getElementById('ee-thought').value,belief:document.getElementById('ee-belief').value,evidenceFor:document.getElementById('ee-evidence-for').value,evidenceAgainst:document.getElementById('ee-evidence-against').value,altThought:document.getElementById('ee-alt-thought').value,altBelief:document.getElementById('ee-alt-belief').value,rerateFeelings:collectFeelings('ee-rerate-list')});
+}
+
+function feelingChipsHTML(arr){
+  return`<div class="detail-feelings">${arr.map(f=>`<span class="detail-feeling-chip">${f.name} <strong>${f.intensity}%</strong></span>`).join('')}</div>`;
+}
+
+function showEntryDetail(idx){
+  const entries=getEntries();
+  const e=entries[idx];if(!e)return;
+  const labels={'thought-log':'Thought log',perspective:'Perspective-taking','court-trial':'Thought on trial','examining-evidence':'Examining evidence'};
+  const date=new Date(e.ts).toLocaleString('en-US',{weekday:'long',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'});
+  document.getElementById('detail-delete-btn').onclick=()=>deleteEntryFromDetail(idx);
+  const field=(label,val)=>val?`<div class="detail-section"><div class="detail-label">${label}</div><div class="detail-value">${String(val).replace(/</g,'&lt;')}</div></div>`:'';
+  const feelingsSec=(label,arr)=>arr&&arr.length?`<div class="detail-section"><div class="detail-label">${label}</div>${feelingChipsHTML(arr)}</div>`:'';
+  const feelings=e.feelings&&e.feelings.length?e.feelings:(e.emotion?[{name:e.emotion,intensity:parseInt(e.intensity)||0}]:[]);
+  const thoughtLabel=e.type==='court-trial'?'Thought in the dock':e.type==='examining-evidence'?'Automatic thought':'Thought';
+  let html=`<div class="detail-header"><span class="log-item-type">${labels[e.type]||e.type}</span><p class="detail-date">${date}</p></div>`;
+  html+=field('Situation',e.situation);
+  html+=feelingsSec('Feelings',feelings);
+  html+=field('Body sensations',e.body);
+  html+=field(thoughtLabel,e.thought);
+  if(e.belief)html+=field('Belief strength',e.belief+'%');
+  html+=field('Evidence for',e.evidenceFor);
+  html+=field('Evidence against',e.evidenceAgainst);
+  html+=field('Alternative thought',e.altThought);
+  if(e.altBelief)html+=field('Alternative belief strength',e.altBelief+'%');
+  html+=feelingsSec('Re-rated feelings',e.rerateFeelings);
+  html+=field('Alternative view',e.alternative);
+  html+=field('Reflection',e.reflection);
+  html+=field('Defense (for)',e.defense);
+  html+=field('Prosecution (against)',e.prosecution);
+  html+=field('Verdict',e.verdict);
+  document.getElementById('detail-content').innerHTML=html;
+  showScreen('entry-detail');
+}
+
+function deleteEntryFromDetail(idx){
+  if(!confirm('Delete this entry?'))return;
+  const e=getEntries();e.splice(idx,1);saveEntries(e);updateStats();showScreen('log');
 }
 
 function addEntry(data){
@@ -562,19 +754,81 @@ function scheduleNotifications(){
 
 function formatEntryText(e){
   const d=new Date(e.ts).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'});
-  const labels={'thought-log':'THOUGHT LOG','perspective':'PERSPECTIVE-TAKING','court-trial':'THOUGHT ON TRIAL'};
-  let lines=[`[${labels[e.type]||e.type}] — ${d}`,'─'.repeat(44)];
+  const labels={'thought-log':'THOUGHT LOG','perspective':'PERSPECTIVE-TAKING','court-trial':'THOUGHT ON TRIAL','examining-evidence':'EXAMINING EVIDENCE'};
+  let lines=[`[${labels[e.type]||e.type.toUpperCase()}] — ${d}`,'─'.repeat(44)];
   if(e.situation)lines.push('Situation: '+e.situation);
-  if(e.emotion)lines.push('Emotion: '+e.emotion+(e.intensity?' ('+e.intensity+'%)':''));
+  if(e.feelings&&e.feelings.length)lines.push('Feelings: '+e.feelings.map(f=>f.name+' ('+f.intensity+'%)').join(', '));
+  else if(e.emotion)lines.push('Emotion: '+e.emotion+(e.intensity?' ('+e.intensity+'%)':''));
   if(e.body)lines.push('Body: '+e.body);
   if(e.thought)lines.push('Thought: '+e.thought);
   if(e.belief)lines.push('Belief strength: '+e.belief+'%');
+  if(e.evidenceFor)lines.push('Evidence for: '+e.evidenceFor);
+  if(e.evidenceAgainst)lines.push('Evidence against: '+e.evidenceAgainst);
+  if(e.altThought)lines.push('Alternative thought: '+e.altThought);
+  if(e.altBelief)lines.push('Alternative belief: '+e.altBelief+'%');
+  if(e.rerateFeelings&&e.rerateFeelings.length)lines.push('Re-rated feelings: '+e.rerateFeelings.map(f=>f.name+' ('+f.intensity+'%)').join(', '));
   if(e.alternative)lines.push('Alternative view: '+e.alternative);
   if(e.reflection)lines.push('Reflection: '+e.reflection);
   if(e.defense)lines.push('Defense (for): '+e.defense);
   if(e.prosecution)lines.push('Prosecution (against): '+e.prosecution);
   if(e.verdict)lines.push('Verdict: '+e.verdict);
   return lines.join('\n')+'\n';
+}
+
+function exportPDF(){
+  const data=getEntries();if(!data.length){alert('No entries to export yet.');return;}
+  const labels={'thought-log':'Thought Log','perspective':'Perspective-Taking','court-trial':'Thought on Trial','examining-evidence':'Examining Evidence'};
+  const colors={'thought-log':'#185FA5','perspective':'#0F6E56','court-trial':'#712B13','examining-evidence':'#534AB7'};
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+  const field=(label,val)=>val?`<div class="f"><div class="fl">${label}</div><div class="fv">${esc(val)}</div></div>`:'';
+  const chips=(arr)=>arr&&arr.length?`<div class="chips">${arr.map(f=>`<span class="chip">${esc(f.name)} ${f.intensity}%</span>`).join('')}</div>`:'';
+  const chipsField=(label,arr)=>arr&&arr.length?`<div class="f"><div class="fl">${label}</div>${chips(arr)}</div>`:'';
+  const sorted=data.slice().sort((a,b)=>b.ts-a.ts);
+  let entries='';
+  for(const e of sorted){
+    const date=new Date(e.ts).toLocaleString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+    const feelings=e.feelings&&e.feelings.length?e.feelings:(e.emotion?[{name:e.emotion,intensity:parseInt(e.intensity)||0}]:[]);
+    const c=colors[e.type]||'#555';
+    entries+=`<div class="entry" style="border-left-color:${c}">`;
+    entries+=`<div class="eh"><span class="et" style="color:${c}">${labels[e.type]||e.type}</span><span class="ed">${date}</span></div>`;
+    entries+=field('Situation',e.situation);
+    entries+=chipsField('Feelings',feelings);
+    entries+=field('Body sensations',e.body);
+    entries+=field(e.type==='court-trial'?'Thought in the dock':e.type==='examining-evidence'?'Automatic thought':'Thought',e.thought);
+    if(e.belief)entries+=field('Belief strength',e.belief+'%');
+    entries+=field('Evidence for',e.evidenceFor);
+    entries+=field('Evidence against',e.evidenceAgainst);
+    entries+=field('Alternative thought',e.altThought);
+    if(e.altBelief)entries+=field('Alternative belief',e.altBelief+'%');
+    entries+=chipsField('Re-rated feelings',e.rerateFeelings);
+    entries+=field('Alternative view',e.alternative);
+    entries+=field('Defense (for)',e.defense);
+    entries+=field('Prosecution (against)',e.prosecution);
+    entries+=field('Verdict',e.verdict);
+    entries+=field('Reflection',e.reflection);
+    entries+=`</div>`;
+  }
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Thought Tracker</title><style>
+    *{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:13px;color:#111;padding:24px;max-width:680px;margin:0 auto}
+    h1{font-size:20px;font-weight:700;margin-bottom:4px}.sub{font-size:12px;color:#666;margin-bottom:28px}
+    .entry{border:1px solid #ddd;border-left:4px solid #999;border-radius:6px;padding:14px 16px;margin-bottom:18px;page-break-inside:avoid}
+    .eh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee;gap:16px}
+    .et{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
+    .ed{font-size:11px;color:#666;text-align:right}
+    .f{margin-bottom:10px}.f:last-child{margin-bottom:0}
+    .fl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#888;margin-bottom:3px}
+    .fv{font-size:13px;line-height:1.6}
+    .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+    .chip{background:#eee;border-radius:20px;padding:3px 10px;font-size:12px}
+    @media print{body{padding:0}.entry{break-inside:avoid}}
+  </style></head><body>
+  <h1>Thought Tracker</h1>
+  <p class="sub">Exported ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})} &middot; ${data.length} entr${data.length===1?'y':'ies'} &middot; Most recent first</p>
+  ${entries}</body></html>`;
+  const w=window.open('','_blank');
+  if(!w){alert('Pop-up blocked — please allow pop-ups for this site and try again.');return;}
+  w.document.write(html);w.document.close();w.focus();
+  setTimeout(()=>w.print(),400);
 }
 
 function exportJSON(){
@@ -606,6 +860,11 @@ async function shareToFiles(){
   }
 }
 
+function normalizeEntry(e){
+  if(!e.feelings&&e.emotion){e.feelings=[{name:e.emotion,intensity:parseInt(e.intensity)||0}];}
+  return e;
+}
+
 function importJSON(){
   const input=document.createElement('input');input.type='file';input.accept='application/json,.json';
   input.onchange=function(e){
@@ -617,10 +876,10 @@ function importJSON(){
         if(!Array.isArray(imported))throw new Error();
         const existing=getEntries();
         const existingTs=new Set(existing.map(e=>e.ts));
-        const merged=existing.concat(imported.filter(e=>e.ts&&!existingTs.has(e.ts)));
+        const merged=existing.concat(imported.filter(e=>e.ts&&!existingTs.has(e.ts)).map(normalizeEntry));
         merged.sort((a,b)=>a.ts-b.ts);
         saveEntries(merged);updateStats();renderLog();
-        alert('Imported '+( merged.length-existing.length)+' new entr'+(merged.length-existing.length===1?'y':'ies')+'.');
+        alert('Imported '+(merged.length-existing.length)+' new entr'+(merged.length-existing.length===1?'y':'ies')+'.');
       }catch{alert('Could not read file. Make sure it is a JSON export from this app.');}
     };
     reader.readAsText(file);
